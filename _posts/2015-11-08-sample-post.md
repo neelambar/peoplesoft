@@ -12,19 +12,19 @@ image:
 
 Below is just about everything you'll need to style in the theme. Check the source code to see the many embedded elements within paragraphs.
 
-# Heading 1
+# Heading 1 PeopleSoft
 
-## Heading 2
+## Heading 2 PeopleSoft
 
-### Heading 3
+### Heading 3 PeopleSoft
 
-#### Heading 4
+#### Heading 4 PeopleSoft
 
-##### Heading 5
+##### Heading 5 PeopleSoft
 
-###### Heading 6
+###### Heading 6 PeopleSoft
 
-### Body text
+### Body text PeopleSoft
 
 Lorem ipsum dolor sit amet, test link adipiscing elit. **This is strong**. Nullam dignissim convallis est. Quisque aliquam.
 
