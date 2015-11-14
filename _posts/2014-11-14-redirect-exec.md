@@ -25,3 +25,11 @@ I evaluated following appraoches each having given pros and cons.
 ####2. Java File API
 
 ####3. Native encoding APIs
+
+{% highlight css %}
+#container {
+  float: left;
+  margin: 0 -240px 0 0;
+  width: 100%;
+}
+{% endhighlight %}
