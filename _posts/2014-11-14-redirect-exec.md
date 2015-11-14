@@ -24,8 +24,7 @@ I evaluated following appraoches each having given pros and cons.
 
 PeopleCode file API function (GetFile, ReadLine, WriteLine etc.) can be used to convert file encoding (as the example given in PeopleBooks).
 
-------
-
+~~~~~~
 
 REM this function, FileEncodingConversion() converts character encoding of 
 input file to another of output file.
@@ -102,7 +101,7 @@ Else
 &FIleEncoding [1] | "_to_" | &FIleEncoding [2] | ".TXT");
 End-If
 
-------
+~~~~~~
 
 ##### Pros
 
