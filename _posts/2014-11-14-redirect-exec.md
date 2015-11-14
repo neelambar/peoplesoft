@@ -20,8 +20,8 @@ As part of a new development I had the requirement to convert a file from WINDOW
 
 I evaluated following appraoches each having given pros and cons.
 
-1. PeopleCode file API
+####1. PeopleCode file API
 
-2. Java File API
+####2. Java File API
 
-3. Native encoding APIs
+####3. Native encoding APIs
