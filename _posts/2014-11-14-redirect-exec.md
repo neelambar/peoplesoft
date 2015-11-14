@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Redirect Exec output
-description: "Redirect output and error when using PeopleCode exec function"
+title: Change file encoding in PeopleCode
+description: "Change file encoding in PeopleCode"
 modified: 2015-11-14
 tags: [PeopleCode]
 image:
@@ -10,7 +10,7 @@ image:
   creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
 
-### Redirect output and error when using PeopleCode exec function
+### Ways to convert file encoding in PeopleCode
 
 Ideally when transferring files to USS using ftp in text mode, the ftp utility automatically converts the file encoding from source native encoding (like WINDOWS-1252) to target native encoding (like IBM-1047) however if we are downloading the attachment to USS using PeopleCode attachment function (like getattachment) this conversion dows not happen (because PeopleSoft stores attachment as hex encoded binary data).
 
