@@ -1,7 +1,7 @@
 ---
 layout: post
-title:Redirect output and error when using PeopleCode Exec function
-description:"Redirect output and error when using exec function"
+title: Redirect output and error when using PeopleCode Exec function
+description: "Redirect output and error when using exec function"
 modified: 2015-11-14
 tags: [Redirect output Exec]
 image:
