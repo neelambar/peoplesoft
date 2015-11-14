@@ -19,3 +19,9 @@ Since on USS most of the utilities expects the file to be encoded in native form
 As part of a new development I had the requirement to convert a file from WINDOWS-1252 code page to IBM-1047 code page.
 
 I evaluated following appraoches each having given pros and cons.
+
+1. PeopleCode file API
+
+2. Java File API
+
+3. Native encoding APIs
