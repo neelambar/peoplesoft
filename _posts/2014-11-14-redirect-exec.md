@@ -22,14 +22,12 @@ I evaluated following appraoches each having given pros and cons.
 
 ####1. PeopleCode file API
 
-##### Cons
+##### Pros
 
 ##### Cons
 
 * PeopleSoft only supports encoding given in the table PSCHARSETS (also given in this link
-http://docs.oracle.com/cd/E41633_01/pt853pbh1/eng/pt/tgbl/concept_UnderstandingCharacterSets-0769d6.html)
-
-If you need to work on some other encoding then this approch is not valid.
+http://docs.oracle.com/cd/E41633_01/pt853pbh1/eng/pt/tgbl/concept_UnderstandingCharacterSets-0769d6.html). If you need to work on some other encoding then this approch is not valid.
 
 * This approch is not efficient for large file.
 
