@@ -1,10 +1,6 @@
 <meta charset="utf-8">
 
-<script>
-  if (window.location.href.indexOf('goodwikis.com') == -1) {
-    window.location.href = 'http://goodwikis.com{{ page.url }}';
-  }
-</script>
+
 
 <title>{% if page.title %}{{ page.title }} &#8211; {% endif %}{{ site.title }}</title>
 <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
