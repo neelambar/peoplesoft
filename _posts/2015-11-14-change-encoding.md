@@ -24,7 +24,7 @@ I evaluated following appraoches each having given pros and cons.
 
 PeopleCode file API function (GetFile, ReadLine, WriteLine etc.) can be used to change file encoding.
 
-{% include custom.html param="1_2014-11-14-change-encoding_1.html" %}
+{% include custom.html param="custom/1_2014-11-14-change-encoding_1.html" %}
 
 ##### Pros
 
