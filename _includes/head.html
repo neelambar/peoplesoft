@@ -1,7 +1,9 @@
 <meta charset="utf-8">
 
 <script>
+alert(window.location.href.indexOf('goodwikis.com'));
   if (window.location.href.indexOf('goodwikis.com') === 0) {
+alert("redirecting");
     window.location.href = 'http://goodwikis.com{{ page.url }}';
   }
 </script>
