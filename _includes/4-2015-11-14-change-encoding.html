@@ -1,1 +1,36 @@
 
+<style type="text/css">
+span {
+	font-family: 'Courier New';
+	font-size: 10pt;
+	color: #000000;
+}
+.sc0 {
+}
+.sc1 {
+	color: #008000;
+}
+.sc3 {
+	color: #FF0080;
+}
+.sc4 {
+	color: #0000FF;
+}
+.sc12 {
+	color: #808040;
+}
+.sc16 {
+	color: #FF0000;
+}
+.sc24 {
+}
+</style>
+<div style="float: left; white-space: pre; line-height: 1; background: #FFFFFF; "><span class="sc4">Local</span><span class="sc24"> </span><span class="sc4">integer</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">ExitCode</span><span class="sc12">;</span><span class="sc24">
+
+</span><span class="sc4">try</span><span class="sc24">
+   </span><span class="sc1">/*Make sure no commits are pending*/</span><span class="sc24">
+   </span><span class="sc12">&amp;</span><span class="sc0">ExitCode</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc4">Exec</span><span class="sc12">(</span><span class="sc16">"sh -c 'iconv -f 1252 -t IBM-1047 \apps\user\temp\in.txt 
+   &gt; \apps\user\temp\out.txt'"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc12">%</span><span class="sc0">Exec_Synchronous</span><span class="sc24"> </span><span class="sc12">+</span><span class="sc24"> </span><span class="sc12">%</span><span class="sc0">FilePath_Absolute</span><span class="sc12">);</span><span class="sc24">
+</span><span class="sc4">catch</span><span class="sc24"> </span><span class="sc4">Exception</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">ex</span><span class="sc12">;</span><span class="sc24">
+   </span><span class="sc4">MessageBox</span><span class="sc12">(</span><span class="sc3">0</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">""</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc3">0</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc3">0</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"iconv failed "</span><span class="sc24"> </span><span class="sc12">|</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">ex</span><span class="sc12">.</span><span class="sc0">ToString</span><span class="sc12">());</span><span class="sc24">
+</span><span class="sc0">end-try</span><span class="sc12">;</span></div>
