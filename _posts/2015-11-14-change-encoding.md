@@ -84,4 +84,4 @@ Remeber to include shell ("sh -c") when using re-direction or pipe. Following co
 
 &ExitCode = Exec(""iconv -f 1252 -t IBM-1047 \apps\user\temp\in.txt > \apps\user\temp\out.txt", %Exec_Synchronous + %FilePath_Absolute);
 
-Instead of using Exec function you can use Java "Runtime" exec method also as shown in this blog ( <http://jjmpsj.blogspot.pt/2010/02/exec-processes-while-controlling-stdin.html>)
+Instead of using Exec function you can use Java "Runtime" exec method also as shown here ( <http://jjmpsj.blogspot.pt/2010/02/exec-processes-while-controlling-stdin.html>)
