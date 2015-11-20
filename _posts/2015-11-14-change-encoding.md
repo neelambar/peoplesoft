@@ -25,7 +25,7 @@ I evaluated following appraoches each having given pros and cons.
 PeopleCode file API function (GetFile, ReadLine, WriteLine etc.) can be used to change file encoding.
 
 {% include 1-2015-11-14-change-encoding.html %}
-
+ 
 
 ##### Pros
 
@@ -45,6 +45,6 @@ http://docs.oracle.com/cd/E41633_01/pt853pbh1/eng/pt/tgbl/concept_UnderstandingC
 You can also access java file API from PeopleCode to read and write file using java supported encoding
 
 {% include 2-2015-11-14-change-encoding.html %}
-
+ 
 
 ####3. Native encoding APIs
