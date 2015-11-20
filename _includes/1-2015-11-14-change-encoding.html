@@ -1,4 +1,3 @@
-
 <style type="text/css">
 span {
 	font-family: 'Courier New';
@@ -29,11 +28,16 @@ span {
 .sc24 {
 }
 </style>
+</head>
+<body>
 <div style="float: left; white-space: pre; line-height: 1; background: #FFFFFF; "><span class="sc4">Local</span><span class="sc24"> </span><span class="sc6">File</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">fileInput</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">fileOutput</span><span class="sc12">;</span><span class="sc24">
 </span><span class="sc4">Local</span><span class="sc24"> </span><span class="sc4">string</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">strLine</span><span class="sc12">;</span><span class="sc24">
 
-</span><span class="sc12">&amp;</span><span class="sc0">fileInput</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc4">GetFile</span><span class="sc12">(</span><span class="sc16">"D:\psoft852\fdm01pa\temp\in.txt"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"R"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"CP1252"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc12">%</span><span class="sc0">FilePath_Absolute</span><span class="sc12">);</span><span class="sc24">
-</span><span class="sc12">&amp;</span><span class="sc0">fileOutput</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc4">GetFile</span><span class="sc12">(</span><span class="sc16">"D:\psoft852\fdm01pa\temp\out.txt"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"W"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"UTF-8"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc12">%</span><span class="sc0">FilePath_Absolute</span><span class="sc12">);</span><span class="sc24">
+</span><span class="sc12">&amp;</span><span class="sc0">fileInput</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc4">GetFile</span><span class="sc12">(</span><span class="sc16">"D:\psoft852\fdm01pa\temp\in.txt"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"R"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"CP1252"</span><span class="sc12">,</span><span class="sc24"> 
+</span><span class="sc12">%</span><span class="sc0">FilePath_Absolute</span><span class="sc12">);</span><span class="sc24">
+
+</span><span class="sc12">&amp;</span><span class="sc0">fileOutput</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc4">GetFile</span><span class="sc12">(</span><span class="sc16">"D:\psoft852\fdm01pa\temp\out.txt"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"W"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"UTF-8"</span><span class="sc12">,</span><span class="sc24"> 
+</span><span class="sc12">%</span><span class="sc0">FilePath_Absolute</span><span class="sc12">);</span><span class="sc24">
 
 </span><span class="sc13">If</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">fileInput</span><span class="sc12">.</span><span class="sc0">IsOpen</span><span class="sc24"> </span><span class="sc4">And</span><span class="sc24">
       </span><span class="sc12">&amp;</span><span class="sc0">fileOutput</span><span class="sc12">.</span><span class="sc0">IsOpen</span><span class="sc24"> </span><span class="sc4">Then</span><span class="sc24">
@@ -49,3 +53,4 @@ Error processing*/</span><span class="sc24">
 
 </span><span class="sc12">&amp;</span><span class="sc0">fileInput</span><span class="sc12">.</span><span class="sc0">Close</span><span class="sc12">();</span><span class="sc24">
 </span><span class="sc12">&amp;</span><span class="sc0">fileOutput</span><span class="sc12">.</span><span class="sc0">Close</span><span class="sc12">();</span></div>
+<br/>
