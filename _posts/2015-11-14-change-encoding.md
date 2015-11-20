@@ -26,6 +26,7 @@ PeopleCode file API function (GetFile, ReadLine, WriteLine etc.) can be used to 
 
 {% include_relative 1-2015-11-14-change-encoding.html %}
 
+
 ##### Pros
 
 * Simple well documented code already used in lot of places.
@@ -41,8 +42,9 @@ http://docs.oracle.com/cd/E41633_01/pt853pbh1/eng/pt/tgbl/concept_UnderstandingC
 
 ####2. Java File API
 
+You can also access java file API from PeopleCode to read and write file using java supported encoding
 
-
+{% include_relative 2-2015-11-14-change-encoding.html %}
 
 
 ####3. Native encoding APIs
