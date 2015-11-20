@@ -42,9 +42,45 @@ http://docs.oracle.com/cd/E41633_01/pt853pbh1/eng/pt/tgbl/concept_UnderstandingC
 
 ####2. Java File API
 
-You can also access java file API from PeopleCode to read and write file using java supported encoding
+You can also access java file API from PeopleCode to read and write file using java supported encodings.
 
 {% include 2-2015-11-14-change-encoding.html %}
+
+If java 7 or above is available then you can read whole file like
+
+{% highlight java %}
+String contents = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+// or equivalently:
+StandardCharsets.UTF_8.decode(ByteBuffer.wrap(Files.readAllBytes(path)));
+{% endhighlight %}
  
+##### Pros
+
+* Can use all the encodings which java suppors (This is the list https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html).
+* Can get rid of line by line reading if java 7 (or higher) or some utility (like Apatche Commons) is available.
+
+##### Cons
+
+* Sometimes consumes exccessive memory (specially on USS).
+* Not recommended for large files.
 
 ####3. Native encoding APIs
+
+I think these are the best approaches from robustness as well as performance point of view.
+
+On WIndows servers, powershell can be used like below.
+
+{% include 3-2015-11-14-change-encoding.html %}
+
+With this appraoch I managed to change file enconding  + lot of regex find replace on a 500mb file in 7 seconds (on a decent window server).
+
+On Unix if "iconv" utility is available then it can be used like below.
+
+{% include 4-2015-11-14-change-encoding.html %}
+
+Remeber to include shell ("sh -c") when using re-direction or pipe. Following command will work on a console but when executed from PeopleSoft it will not generate a file and output will be re-directed to PeopleSoft stdout and stderror.
+
+&ExitCode = Exec(""iconv -f 1252 -t IBM-1047 \apps\user\temp\in.txt > \apps\user\temp\out.txt", %Exec_Synchronous + %FilePath_Absolute);
+
+In-stead of using Exec function you can use Java "Runtime" exec method also as shown in this blog (http://jjmpsj.blogspot.pt/2010/02/exec-processes-while-controlling-stdin.html)
+
