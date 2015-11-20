@@ -36,7 +36,7 @@ PeopleCode file API function (GetFile, ReadLine, WriteLine etc.) can be used to 
 ##### Cons
 
 * PeopleSoft only supports encoding given in the table PSCHARSETS (also provided in global technology PeopleBook.
-http://docs.oracle.com/cd/E41633_01/pt853pbh1/eng/pt/tgbl/concept_UnderstandingCharacterSets-0769d6.html). If you need to work on some other encoding then this approch is not valid.
+<http://docs.oracle.com/cd/E41633_01/pt853pbh1/eng/pt/tgbl/concept_UnderstandingCharacterSets-0769d6.html>). If you need to work on some other encoding then this approch is not valid.
 
 * This approch is not efficient for large files (125M xml file takes indefinite time).
 
@@ -56,7 +56,7 @@ StandardCharsets.UTF_8.decode(ByteBuffer.wrap(Files.readAllBytes(path)));
  
 ##### Pros
 
-* Can use all the encodings which java suppors (This is the list https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html).
+* Can use all the encodings which java suppors (This is the list <https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html>).
 * Can get rid of line by line reading if java 7 (or higher) or some utility (like Apatche Commons) is available.
 
 ##### Cons
@@ -84,4 +84,4 @@ Remeber to include shell ("sh -c") when using re-direction or pipe. Following co
 
 &ExitCode = Exec(""iconv -f 1252 -t IBM-1047 \apps\user\temp\in.txt > \apps\user\temp\out.txt", %Exec_Synchronous + %FilePath_Absolute);
 
-In-stead of using Exec function you can use Java "Runtime" exec method also as shown in this blog ( http://jjmpsj.blogspot.pt/2010/02/exec-processes-while-controlling-stdin.html )
+Instead of using Exec function you can use Java "Runtime" exec method also as shown in this blog ( <http://jjmpsj.blogspot.pt/2010/02/exec-processes-while-controlling-stdin.html>)
