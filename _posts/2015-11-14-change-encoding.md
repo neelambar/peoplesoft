@@ -26,8 +26,6 @@ PeopleCode file API function (GetFile, ReadLine, WriteLine etc.) can be used to 
 
 {% include_relative 1-2015-11-14-change-encoding.html %}
 
-hello
-
 ##### Pros
 
 * Simple well documented code already used in lot of places.
