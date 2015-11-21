@@ -1,11 +1,11 @@
 title:            PeopleSoft
 description:      PeopleSoft Blog.
-disqus_shortname: Demo
+disqus_shortname: goodwikis
 reading_time:     true
 words_per_minute: 200
 # Your site's domain goes here (eg: //mmistakes.github.io, http://mademistakes.com, etc)
 # When testing locally leave blank or use http://localhost:4000
-url: http://neelambar.github.io/peoplesoft
+url: http://goodwikis.com
 
 # Owner/author information
 owner:

@@ -1,0 +1,53 @@
+<style type="text/css">
+span {
+	font-family: 'Courier New';
+	font-size: 10pt;
+	color: #000000;
+}
+.sc0 {
+}
+.sc1 {
+	color: #008000;
+}
+.sc3 {
+	color: #FF0080;
+}
+.sc4 {
+	color: #0000FF;
+}
+.sc6 {
+	font-weight: bold;
+	color: #0000FF;
+}
+.sc12 {
+	color: #808040;
+}
+.sc16 {
+	color: #FF0000;
+}
+.sc24 {
+}
+</style>
+<div class="highlight" style="white-space: pre; line-height: 1; background: #FFFFFF; "><pre><span class="sc4">Local</span><span class="sc24"> </span><span class="sc6">File</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">fileRun</span><span class="sc12">;</span><span class="sc24">
+</span><span class="sc4">Local</span><span class="sc24"> </span><span class="sc4">integer</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">ExitCode</span><span class="sc12">;</span><span class="sc24">
+</span><span class="sc4">Local</span><span class="sc24"> </span><span class="sc4">string</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">path</span><span class="sc12">;</span><span class="sc24">
+
+</span><span class="sc12">&amp;</span><span class="sc0">path</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc4">GetEnv</span><span class="sc12">(</span><span class="sc16">"PS_SERVDIR"</span><span class="sc12">)</span><span class="sc24"> </span><span class="sc12">|</span><span class="sc24"> </span><span class="sc16">"\files"</span><span class="sc12">;</span><span class="sc24">
+
+</span><span class="sc4">try</span><span class="sc24">
+   
+   </span><span class="sc12">&amp;</span><span class="sc0">fileRun</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc0">GetTempFile</span><span class="sc12">(&amp;</span><span class="sc0">path</span><span class="sc24"> </span><span class="sc12">|</span><span class="sc24"> </span><span class="sc16">"\powershell.bat"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"W"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc12">%</span><span class="sc4">FilePath_Absolute</span><span class="sc12">);</span><span class="sc24">
+
+   </span><span class="sc12">&amp;</span><span class="sc0">fileRun</span><span class="sc12">.</span><span class="sc0">WriteLine</span><span class="sc12">(</span><span class="sc16">"powershell.exe -command ""[System.IO.File]::WriteAllText
+   ('D:\psoft852\fdm01pa\temp\out.txt',[System.IO.File]::ReadAllText
+   ('D:\psoft852\fdm01pa\temp\in.txt',[system.text.encoding]::GetEncoding(1252))
+   ,[system.text.encoding]::GetEncoding(65001));"""</span><span class="sc12">);</span><span class="sc24">
+   
+   </span><span class="sc12">&amp;</span><span class="sc0">fileRun</span><span class="sc12">.</span><span class="sc0">Close</span><span class="sc12">();</span><span class="sc24">
+   
+   </span><span class="sc1">/*Make sure no commits are pending*/</span><span class="sc24">
+   </span><span class="sc12">&amp;</span><span class="sc0">ExitCode</span><span class="sc24"> </span><span class="sc12">=</span><span class="sc24"> </span><span class="sc4">Exec</span><span class="sc12">(</span><span class="sc4">GetEnv</span><span class="sc12">(</span><span class="sc16">"SystemRoot"</span><span class="sc12">)</span><span class="sc24"> </span><span class="sc12">|</span><span class="sc24"> </span><span class="sc16">"\system32\cmd.exe /C "</span><span class="sc24"> </span><span class="sc12">|</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">path</span><span class="sc24"> </span><span class="sc12">|</span><span class="sc24"> </span><span class="sc16">"\powershell.bat"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc12">%</span><span class="sc4">Exec_Synchronous</span><span class="sc24"> </span><span class="sc12">+</span><span class="sc24"> </span><span class="sc12">%</span><span class="sc4">FilePath_Absolute</span><span class="sc12">);</span><span class="sc24">
+   
+</span><span class="sc4">catch</span><span class="sc24"> </span><span class="sc4">Exception</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">ex</span><span class="sc12">;</span><span class="sc24">
+   </span><span class="sc4">MessageBox</span><span class="sc12">(</span><span class="sc3">0</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">""</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc3">0</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc3">0</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"exec failed "</span><span class="sc24"> </span><span class="sc12">|</span><span class="sc24"> </span><span class="sc12">&amp;</span><span class="sc0">ex</span><span class="sc12">.</span><span class="sc0">ToString</span><span class="sc12">());</span><span class="sc24">
+</span><span class="sc4">end-try</span><span class="sc12">;</span></pre></div>
