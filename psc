@@ -1,94 +1,83 @@
-# Define the URL and output directory
+# Define the URL of the page to download
 $url = "https://example.com"
-$outputDirectory = "C:\path\to\downloaded_site"
 
-# Create the output directory if it doesn't exist
-if (-not (Test-Path -Path $outputDirectory)) {
-    New-Item -Path $outputDirectory -ItemType Directory
+# Define the output directory
+$outputDir = "C:\DownloadedPage"
+$jsDir = "js"
+$cssDir = "css"
+$imgDir = "img"
+$indexFile = "index.html"
+
+# Create the output directory and subdirectories if they don't exist
+$dirs = @($outputDir, "$outputDir\$jsDir", "$outputDir\$cssDir", "$outputDir\$imgDir")
+foreach ($dir in $dirs) {
+    if (-not (Test-Path -Path $dir)) {
+        New-Item -Path $dir -ItemType Directory | Out-Null
+    }
 }
 
-# Function to download the HTML page
-function Download-HTMLPage {
-    param(
-        [string]$url,
-        [string]$outputDirectory
+# Download the HTML page
+$html = Invoke-WebRequest -Uri $url -UseBasicParsing
+$rawHtml = $html.Content
+
+# Save the HTML to a local file
+$indexPath = Join-Path -Path $outputDir -ChildPath $indexFile
+Set-Content -Path $indexPath -Value $rawHtml
+
+# Function to download resources and update links
+function Download-ResourceAndUpdateLink {
+    param (
+        [string]$resourceUrl,
+        [string]$subDir
     )
     
-    # Download the HTML content
-    $response = Invoke-WebRequest -Uri $url -UseBasicParsing
-    $htmlContent = $response.Content
+    # Get the resource URI
+    $resourceUri = New-Object Uri($resourceUrl, [UriKind]::RelativeOrAbsolute)
     
-    # Save the HTML content to a file
-    $htmlFilePath = Join-Path $outputDirectory "index.html"
-    Set-Content -Path $htmlFilePath -Value $htmlContent
-    
-    return $htmlFilePath
-}
-
-# Function to download resources and update HTML
-function Download-Resources {
-    param(
-        [string]$htmlFilePath,
-        [string]$outputDirectory
-    )
-    
-    # Load the HTML content
-    $htmlContent = Get-Content -Path $htmlFilePath
-    
-    # Match resource links (images, CSS, JS)
-    $htmlContent = $htmlContent -replace '(<img[^>]+?src=["\'])([^"\']+)(["\'])', {
-        $resourceUrl = $matches[2]
-        $localPath = Download-Resource -url $resourceUrl -outputDirectory $outputDirectory
-        "$($matches[1])$localPath$($matches[3])"
+    if ($resourceUri.IsAbsoluteUri -eq $false) {
+        $resourceUri = New-Object Uri($html.BaseResponse.ResponseUri, $resourceUrl)
     }
     
-    $htmlContent = $htmlContent -replace '(<link[^>]+?href=["\'])([^"\']+)(["\'])', {
-        $resourceUrl = $matches[2]
-        $localPath = Download-Resource -url $resourceUrl -outputDirectory $outputDirectory
-        "$($matches[1])$localPath$($matches[3])"
-    }
+    # Determine the local file path for the resource
+    $resourceFileName = [System.IO.Path]::GetFileName($resourceUri.AbsolutePath)
+    $localResourcePath = Join-Path -Path (Join-Path -Path $outputDir -ChildPath $subDir) -ChildPath $resourceFileName
     
-    $htmlContent = $htmlContent -replace '(<script[^>]+?src=["\'])([^"\']+)(["\'])', {
-        $resourceUrl = $matches[2]
-        $localPath = Download-Resource -url $resourceUrl -outputDirectory $outputDirectory
-        "$($matches[1])$localPath$($matches[3])"
-    }
-
-    # Save the modified HTML content
-    Set-Content -Path $htmlFilePath -Value $htmlContent
-}
-
-# Function to download individual resources
-function Download-Resource {
-    param(
-        [string]$url,
-        [string]$outputDirectory
-    )
-
-    # Handle relative URLs
-    if ($url -notmatch "^https?:\/\/") {
-        $baseUri = [System.Uri]$global:url
-        $resourceUri = New-Object System.Uri($baseUri, $url)
-        $url = $resourceUri.AbsoluteUri
-    }
-    
-    # Get the resource file name
-    $fileName = [System.IO.Path]::GetFileName($url)
-    $outputPath = Join-Path $outputDirectory $fileName
-
+    # Download the resource
     try {
-        # Download the resource
-        Invoke-WebRequest -Uri $url -OutFile $outputPath -UseBasicParsing
-        Write-Host "Downloaded: $url -> $outputPath"
-        return $fileName
+        Invoke-WebRequest -Uri $resourceUri.AbsoluteUri -OutFile $localResourcePath -UseBasicParsing
     } catch {
-        Write-Warning "Failed to download resource: $url"
-        return $url  # Return the original URL if download fails
+        Write-Warning "Failed to download $resourceUri"
+        return $resourceUrl  # Return the original URL if download fails
+    }
+    
+    # Return the local resource path relative to the output directory
+    return Join-Path -Path $subDir -ChildPath $resourceFileName
+}
+
+# Update the HTML content and download resources
+$rawHtml = $rawHtml -replace "(href|src)=([""'])([^""']+)([""'])", {
+    param($match)
+    $attribute = $match[1]
+    $quote = $match[2]
+    $resourceUrl = $match[3]
+    
+    # Determine the correct subdirectory based on the resource type
+    $subDir = switch -regex ($resourceUrl) {
+        '\.js$' { $jsDir }
+        '\.css$' { $cssDir }
+        '\.(jpg|jpeg|png|gif|svg)$' { $imgDir }
+        default { "" }
+    }
+
+    if ($subDir) {
+        $localResource = Download-ResourceAndUpdateLink $resourceUrl $subDir
+        return "$attribute=$quote$localResource$quote"
+    } else {
+        return $match.Value  # Keep the original URL if the resource type is not recognized
     }
 }
 
-# Start the process
-$htmlFilePath = Download-HTMLPage -url $url -outputDirectory $outputDirectory
-Download-Resources -htmlFilePath $htmlFilePath -outputDirectory $outputDirectory
+# Save the updated HTML
+Set-Content -Path $indexPath -Value $rawHtml
 
-Write-Host "Download completed successfully."
+Write-Host "Downloaded HTML and resources to $outputDir"
