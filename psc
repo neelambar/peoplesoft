@@ -1,74 +1,98 @@
-# Function to download a file with progress indication
-function Download-FileWithProgress($url, $destination) {
-    $client = New-Object System.Net.WebClient
-    $client.AddHeaders("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6446.79 Safari/537.36")
+function Get-Wget {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$Url,
 
-    $client.DownloadProgressChanged += {
-        Write-Progress -Activity "Downloading $url" -Status "($($client.Progress.PercentComplete)%)" -CurrentOperation "Downloading..." -Completed $client.Progress.BytesReceived -Total $client.Progress.TotalBytesToReceive
-    }
+        [string]$OutFile,
 
-    $client.DownloadFile($url, $destination)
-}
+        [switch]$DownloadResources
+    )
 
-# Function to download a web page and its linked resources
-function Download-WebPage($url, $destination) {
-    $webClient = New-Object System.Net.WebClient
-    $webClient.Encoding = [system.text.encoding]::UTF8
+    # Define a base directory for downloaded resources
+    $baseDirectory = Split-Path -Path $OutFile -Parent
+    $cssDirectory = Join-Path $baseDirectory "css"
+    $jsDirectory = Join-Path $baseDirectory "js"
+    $imagesDirectory = Join-Path $baseDirectory "images"
 
-    try {
-        $html = $webClient.DownloadString($url)
-    } catch {
-        Write-Warning "Failed to download $url: $($_.Exception.Message)"
-        return
-    }
+    # Create directories for resources if they do not exist
+    New-Item -ItemType Directory -Force -Path $cssDirectory, $jsDirectory, $imagesDirectory
 
-    $baseUri = [Uri]($url)
-    $destinationDir = Join-Path $destination $baseUri.AbsolutePath
+    # Download the main HTML file
+    Write-Host "Downloading $Url to $OutFile"
+    Invoke-WebRequest -Uri $Url -OutFile $OutFile
 
-    # Create destination directory if it doesn't exist
-    if (!(Test-Path $destinationDir)) {
-        New-Item -Path $destinationDir -ItemType Directory
-    }
+    # If the -DownloadResources switch is specified, download linked resources
+    if ($DownloadResources) {
+        Write-Host "Downloading linked resources..."
 
-    # Extract links from HTML (excluding HTML links)
-    $links = [regex]::Matches($html, "(src)=\'(?<url>[^\']+)\'") |
-             ForEach-Object { $_.Groups["url"].Value } |
-             Where-Object { $_.StartsWith("http") }
+        # Load the HTML content
+        $htmlContent = Get-Content $OutFile -Raw
 
-    # Download linked resources (excluding HTML links)
-    foreach ($link in $links) {
-        $uri = [Uri]($link)
-        $relativePath = $uri.AbsolutePath
+        # Regex patterns to identify resource URLs
+        $cssRegex = '<link[^>]+href=["'']([^"''>]+\.css(\?[^"''>]*)?)["'']'
+        $jsRegex = '<script[^>]+src=["'']([^"''>]+\.js(\?[^"''>]*)?)["'']'
+        $imgRegex = '<img[^>]+src=["'']([^"''>]+(\?[^"''>]*)?)["'']'
 
-        if ($relativePath.EndsWith(".js")) {
-            $targetDir = Join-Path $destinationDir "js"
-        } elseif ($relativePath.EndsWith(".css")) {
-            $targetDir = Join-Path $destinationDir "css"
-        } elseif ($relativePath.EndsWith(".png") -or $relativePath.EndsWith(".jpg") -or $relativePath.EndsWith(".jpeg") -or $relativePath.EndsWith(".gif")) {
-            $targetDir = Join-Path $destinationDir "images"
-        } else {
-            continue  # Skip non-resource links (HTML links)
+        # Function to download resources and update the HTML
+        function Download-And-UpdateResource {
+            param (
+                [string]$resourceUrl,
+                [string]$destinationDirectory
+            )
+
+            # Remove query parameters from the resource URL
+            $cleanUrl = $resourceUrl.Split('?')[0]
+
+            # Resolve relative URLs
+            $resourceUri = New-Object System.Uri($cleanUrl, [System.UriKind]::RelativeOrAbsolute)
+            if (-not $resourceUri.IsAbsoluteUri) {
+                $resourceUri = New-Object System.Uri((New-Object System.Uri($Url)), $resourceUri)
+            }
+
+            $fileName = [System.IO.Path]::GetFileName($resourceUri.AbsoluteUri)
+            $destinationPath = Join-Path $destinationDirectory $fileName
+
+            # Download the resource
+            Write-Host "Downloading resource $resourceUri to $destinationPath"
+            Invoke-WebRequest -Uri $resourceUri.AbsoluteUri -OutFile $destinationPath
+
+            # Return the relative path for updating the HTML
+            return "./" + [System.IO.Path]::GetFileName($destinationDirectory) + "/" + $fileName
         }
 
-        # Create target directory if it doesn't exist
-        if (!(Test-Path $targetDir)) {
-            New-Item -Path $targetDir -ItemType Directory
+        # Function to process matches, download resources, and update HTML
+        function Process-Matches {
+            param (
+                [string]$htmlContent,
+                [string]$regexPattern,
+                [string]$destinationDirectory
+            )
+
+            # Create a regex object and find matches
+            $regex = New-Object System.Text.RegularExpressions.Regex($regexPattern)
+            $matches = $regex.Matches($htmlContent)
+
+            # Iterate over all matches
+            foreach ($match in $matches) {
+                $resourceUrl = $match.Groups[1].Value
+                if ($resourceUrl) {
+                    $newPath = Download-And-UpdateResource $resourceUrl $destinationDirectory
+                    $escapedUrl = [regex]::Escape($resourceUrl)
+                    $htmlContent = $htmlContent -replace $escapedUrl, $newPath
+                }
+            }
+            return $htmlContent
         }
 
-        $targetFile = Join-Path $targetDir $uri.AbsolutePath.Substring(1)
-        Download-FileWithProgress $link $targetFile
-    }
+        # Process and download each resource type
+        $htmlContent = Process-Matches $htmlContent $cssRegex $cssDirectory
+        $htmlContent = Process-Matches $htmlContent $jsRegex $jsDirectory
+        $htmlContent = Process-Matches $htmlContent $imgRegex $imagesDirectory
 
-    # Save the downloaded HTML page
-    $htmlFile = Join-Path $destinationDir "index.html"
-    Set-Content -Path $htmlFile -Value $html
+        # Save the updated HTML content
+        Set-Content -Path $OutFile -Value $htmlContent
+    }
 }
 
-# Get the Confluence URL from the user
-$confluenceUrl = Read-Host "Enter the Confluence URL:"
-
-# Specify the destination directory
-$destinationDir = "C:\ConfluenceDownload"
-
-# Download the Confluence web page and its linked resources (excluding HTML links)
-Download-WebPage $confluenceUrl $destinationDir
+# Example usage:
+Get-Wget -Url "https://confluence.atlassian.com/doc/blog/2015/08/create-sprint-retrospective-and-demo-pages-like-a-boss" -OutFile "C:\temp\download\index.html" -DownloadResources
