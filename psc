@@ -1,83 +1,68 @@
-# Define the URL of the page to download
-$url = "https://example.com"
+# Define the URL and the output directory
+$url = "http://example.com"
+$outputDir = "C:\path\to\output\directory"
 
-# Define the output directory
-$outputDir = "C:\DownloadedPage"
-$jsDir = "js"
-$cssDir = "css"
-$imgDir = "img"
-$indexFile = "index.html"
+# Create directories for resources
+$cssDir = "$outputDir\css"
+$jsDir = "$outputDir\js"
+$imgDir = "$outputDir\img"
 
-# Create the output directory and subdirectories if they don't exist
-$dirs = @($outputDir, "$outputDir\$jsDir", "$outputDir\$cssDir", "$outputDir\$imgDir")
-foreach ($dir in $dirs) {
-    if (-not (Test-Path -Path $dir)) {
-        New-Item -Path $dir -ItemType Directory | Out-Null
-    }
-}
+# Ensure directories exist
+New-Item -ItemType Directory -Force -Path $outputDir, $cssDir, $jsDir, $imgDir
 
-# Download the HTML page
-$html = Invoke-WebRequest -Uri $url -UseBasicParsing
-$rawHtml = $html.Content
+# Download the HTML content
+$htmlContent = Invoke-WebRequest -Uri $url
 
-# Save the HTML to a local file
-$indexPath = Join-Path -Path $outputDir -ChildPath $indexFile
-Set-Content -Path $indexPath -Value $rawHtml
+# Parse HTML content
+$parsedHtml = [xml]$htmlContent.Content
 
-# Function to download resources and update links
-function Download-ResourceAndUpdateLink {
+# Function to download and replace resource links
+function Download-Resource {
     param (
         [string]$resourceUrl,
-        [string]$subDir
+        [string]$resourceDir,
+        [string]$resourceTag,
+        [string]$attribute
     )
-    
-    # Get the resource URI
-    $resourceUri = New-Object Uri($resourceUrl, [UriKind]::RelativeOrAbsolute)
-    
-    if ($resourceUri.IsAbsoluteUri -eq $false) {
-        $resourceUri = New-Object Uri($html.BaseResponse.ResponseUri, $resourceUrl)
+
+    # Make sure resource URL is absolute
+    $absoluteUrl = $resourceUrl
+    if ($resourceUrl -notmatch "^https?://") {
+        $absoluteUrl = [uri]::new($htmlContent.BaseResponse.ResponseUri, $resourceUrl).AbsoluteUri
     }
-    
-    # Determine the local file path for the resource
-    $resourceFileName = [System.IO.Path]::GetFileName($resourceUri.AbsolutePath)
-    $localResourcePath = Join-Path -Path (Join-Path -Path $outputDir -ChildPath $subDir) -ChildPath $resourceFileName
-    
+
+    # Determine the local file path
+    $fileName = [System.IO.Path]::GetFileName($absoluteUrl)
+    $localFilePath = "$resourceDir\$fileName"
+
     # Download the resource
-    try {
-        Invoke-WebRequest -Uri $resourceUri.AbsoluteUri -OutFile $localResourcePath -UseBasicParsing
-    } catch {
-        Write-Warning "Failed to download $resourceUri"
-        return $resourceUrl  # Return the original URL if download fails
-    }
-    
-    # Return the local resource path relative to the output directory
-    return Join-Path -Path $subDir -ChildPath $resourceFileName
-}
+    Invoke-WebRequest -Uri $absoluteUrl -OutFile $localFilePath
 
-# Update the HTML content and download resources
-$rawHtml = $rawHtml -replace "(href|src)=([""'])([^""']+)([""'])", {
-    param($match)
-    $attribute = $match[1]
-    $quote = $match[2]
-    $resourceUrl = $match[3]
-    
-    # Determine the correct subdirectory based on the resource type
-    $subDir = switch -regex ($resourceUrl) {
-        '\.js$' { $jsDir }
-        '\.css$' { $cssDir }
-        '\.(jpg|jpeg|png|gif|svg)$' { $imgDir }
-        default { "" }
-    }
-
-    if ($subDir) {
-        $localResource = Download-ResourceAndUpdateLink $resourceUrl $subDir
-        return "$attribute=$quote$localResource$quote"
-    } else {
-        return $match.Value  # Keep the original URL if the resource type is not recognized
+    # Update the HTML content with local file reference
+    $parsedHtml.SelectNodes("//$resourceTag[@$attribute='$resourceUrl']") | ForEach-Object {
+        $_.$attribute = "$resourceTag/$fileName"
     }
 }
 
-# Save the updated HTML
-Set-Content -Path $indexPath -Value $rawHtml
+# Download and replace CSS links
+$parsedHtml.SelectNodes("//link[@rel='stylesheet']") | ForEach-Object {
+    $cssUrl = $_.href
+    Download-Resource -resourceUrl $cssUrl -resourceDir $cssDir -resourceTag "link" -attribute "href"
+}
 
-Write-Host "Downloaded HTML and resources to $outputDir"
+# Download and replace JavaScript links
+$parsedHtml.SelectNodes("//script[@src]") | ForEach-Object {
+    $jsUrl = $_.src
+    Download-Resource -resourceUrl $jsUrl -resourceDir $jsDir -resourceTag "script" -attribute "src"
+}
+
+# Download and replace image links
+$parsedHtml.SelectNodes("//img[@src]") | ForEach-Object {
+    $imgUrl = $_.src
+    Download-Resource -resourceUrl $imgUrl -resourceDir $imgDir -resourceTag "img" -attribute "src"
+}
+
+# Save the modified HTML content
+$parsedHtml.Save("$outputDir\index.html")
+
+Write-Host "Download complete. HTML and resources saved to $outputDir"
