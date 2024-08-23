@@ -1,98 +1,44 @@
-function Get-Wget {
-    param (
-        [Parameter(Mandatory=$true)]
-        [string]$Url,
+# Set variables
+$confluenceUrl = "https://your-confluence-instance.atlassian.net/wiki"
+$spaceKey = "SPACEKEY"
+$username = "your.email@example.com"
+$apiToken = "your_api_token"
+$outputDirectory = "C:\path\to\output\"
 
-        [string]$OutFile,
-
-        [switch]$DownloadResources
-    )
-
-    # Define a base directory for downloaded resources
-    $baseDirectory = Split-Path -Path $OutFile -Parent
-    $cssDirectory = Join-Path $baseDirectory "css"
-    $jsDirectory = Join-Path $baseDirectory "js"
-    $imagesDirectory = Join-Path $baseDirectory "images"
-
-    # Create directories for resources if they do not exist
-    New-Item -ItemType Directory -Force -Path $cssDirectory, $jsDirectory, $imagesDirectory
-
-    # Download the main HTML file
-    Write-Host "Downloading $Url to $OutFile"
-    Invoke-WebRequest -Uri $Url -OutFile $OutFile
-
-    # If the -DownloadResources switch is specified, download linked resources
-    if ($DownloadResources) {
-        Write-Host "Downloading linked resources..."
-
-        # Load the HTML content
-        $htmlContent = Get-Content $OutFile -Raw
-
-        # Regex patterns to identify resource URLs
-        $cssRegex = '<link[^>]+href=["'']([^"''>]+\.css(\?[^"''>]*)?)["'']'
-        $jsRegex = '<script[^>]+src=["'']([^"''>]+\.js(\?[^"''>]*)?)["'']'
-        $imgRegex = '<img[^>]+src=["'']([^"''>]+(\?[^"''>]*)?)["'']'
-
-        # Function to download resources and update the HTML
-        function Download-And-UpdateResource {
-            param (
-                [string]$resourceUrl,
-                [string]$destinationDirectory
-            )
-
-            # Remove query parameters from the resource URL
-            $cleanUrl = $resourceUrl.Split('?')[0]
-
-            # Resolve relative URLs
-            $resourceUri = New-Object System.Uri($cleanUrl, [System.UriKind]::RelativeOrAbsolute)
-            if (-not $resourceUri.IsAbsoluteUri) {
-                $resourceUri = New-Object System.Uri((New-Object System.Uri($Url)), $resourceUri)
-            }
-
-            $fileName = [System.IO.Path]::GetFileName($resourceUri.AbsoluteUri)
-            $destinationPath = Join-Path $destinationDirectory $fileName
-
-            # Download the resource
-            Write-Host "Downloading resource $resourceUri to $destinationPath"
-            Invoke-WebRequest -Uri $resourceUri.AbsoluteUri -OutFile $destinationPath
-
-            # Return the relative path for updating the HTML
-            return "./" + [System.IO.Path]::GetFileName($destinationDirectory) + "/" + $fileName
-        }
-
-        # Function to process matches, download resources, and update HTML
-        function Process-Matches {
-            param (
-                [string]$htmlContent,
-                [string]$regexPattern,
-                [string]$destinationDirectory
-            )
-
-            # Create a regex object and find matches
-            $regex = New-Object System.Text.RegularExpressions.Regex($regexPattern)
-            $matches = $regex.Matches($htmlContent)
-
-            # Iterate over all matches
-            foreach ($match in $matches) {
-                $resourceUrl = $match.Groups[1].Value
-                if ($resourceUrl) {
-                    $newPath = Download-And-UpdateResource $resourceUrl $destinationDirectory
-                    $escapedUrl = [regex]::Escape($resourceUrl)
-                    $htmlContent = $htmlContent -replace $escapedUrl, $newPath
-                }
-            }
-            return $htmlContent
-        }
-
-        # Process and download each resource type
-        $htmlContent = Process-Matches $htmlContent $cssRegex $cssDirectory
-        $htmlContent = Process-Matches $htmlContent $jsRegex $jsDirectory
-        $htmlContent = Process-Matches $htmlContent $imgRegex $imagesDirectory
-
-        # Save the updated HTML content
-        Set-Content -Path $OutFile -Value $htmlContent
-    }
+# Create the authorization header
+$authHeader = @{
+    Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$username:$apiToken"))
 }
 
-# Example usage:
-Get-Wget -Url "https://confluence.atlassian.com/doc/blog/2015/08/create-sprint-retrospective-and-demo-pages-like-a-boss" -OutFile "C:\temp\download\index.html" -DownloadResources
+# Function to export a single page as PDF
+function Export-PageAsPdf {
+    param (
+        [string]$pageId,
+        [string]$title
+    )
+
+    # Replace invalid characters in the title for file naming
+    $safeTitle = $title -replace '[\/:*?"<>|]', ''
+
+    # Form the URL to download the page as PDF
+    $pdfUrl = "$confluenceUrl/export/pdf/$pageId"
+
+    # Define the output path for the PDF
+    $outputPath = Join-Path -Path $outputDirectory -ChildPath "$safeTitle.pdf"
+
+    # Make the API request to download the PDF
+    Invoke-WebRequest -Uri $pdfUrl -Headers $authHeader -Method Get -OutFile $outputPath
+
+    Write-Output "Downloaded $title as PDF"
+}
+
+# Get all pages in the space
+$pageUrl = "$confluenceUrl/rest/api/content?spaceKey=$spaceKey&limit=1000&expand=title"
+$response = Invoke-RestMethod -Uri $pageUrl -Headers $authHeader -Method Get
+
+# Export each page as PDF
+foreach ($page in $response.results) {
+    Export-PageAsPdf -pageId $page.id -title $page.title
+}
+
+Write-Output "All pages from space '$spaceKey' have been exported."
