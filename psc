@@ -1,10 +1,23 @@
-WITH TEMP(PNLNAME) AS (SELECT A.PNLNAME FROM PSPNLGROUP A WHERE A.PNLGRPNAME = 'BUS_UNIT_TBL_GL'
-UNION ALL
-SELECT B.SUBPNLNAME FROM PSPNLFIELD B,TEMP WHERE TEMP.PNLNAME = B.PNLNAME)
-SELECT DISTINCT C.RECNAME FROM TEMP,PSPNLFIELD C,PSRECDEFN D WHERE TEMP.PNLNAME = C.PNLNAME
-AND C.RECNAME = D.RECNAME AND D.RECTYPE = 0
+/* Load XML into XmlDoc */
+Local XmlDoc &xmlDoc = CreateXmlDoc("<?xml version='1.0' encoding='UTF-8'?>
+<root xmlns:ns='http://example.com/ns'>
+  <ns:item>Item 1</ns:item>
+  <ns:item>Item 2</ns:item>
+</root>");
 
-WITH TEMP(PNLNAME) AS (SELECT A.PNLNAME FROM PSPNLGROUP A WHERE A.PNLGRPNAME = 'ALLOC_GROUP'
-UNION ALL
-SELECT B.SUBPNLNAME FROM PSPNLFIELD B,TEMP WHERE TEMP.PNLNAME = B.PNLNAME)
-SELECT DISTINCT C.RECNAME FROM TEMP,PSPNLFIELD C WHERE TEMP.PNLNAME = C.PNLNAME
+/* Define the namespace prefix and URI */
+Local string &namespacePrefix = "ns";
+Local string &namespaceUri = "http://example.com/ns";
+
+/* Register the namespace */
+&xmlDoc.AddNameSpace(&namespacePrefix, &namespaceUri);
+
+/* Find nodes with namespace using XPath */
+Local XmlNode &rootNode = &xmlDoc.DocumentElement;
+Local XmlNodeList &nodeList = &rootNode.SelectNodes("//ns:item");
+
+Local XmlNode &node;
+For &node in &nodeList
+   /* Process each found node */
+   WinMessage("Node Value: " | &node.NodeValue, 0);
+End-For;
