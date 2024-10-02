@@ -1,23 +1,31 @@
-/* Load XML into XmlDoc */
-Local XmlDoc &xmlDoc = CreateXmlDoc("<?xml version='1.0' encoding='UTF-8'?>
-<root xmlns:ns='http://example.com/ns'>
-  <ns:item>Item 1</ns:item>
-  <ns:item>Item 2</ns:item>
-</root>");
+# Path to your XML file
+$xmlFilePath = "C:\path\to\your\file.xml"
 
-/* Define the namespace prefix and URI */
-Local string &namespacePrefix = "ns";
-Local string &namespaceUri = "http://example.com/ns";
+# Load the XML file
+[xml]$xml = Get-Content $xmlFilePath
 
-/* Register the namespace */
-&xmlDoc.AddNameSpace(&namespacePrefix, &namespaceUri);
+# Define the namespace manager
+$namespaceMgr = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
 
-/* Find nodes with namespace using XPath */
-Local XmlNode &rootNode = &xmlDoc.DocumentElement;
-Local XmlNodeList &nodeList = &rootNode.SelectNodes("//ns:item");
+# Add the namespace(s) used in the XML file (replace 'ns' and 'http://example.com/namespace' with actual values)
+$namespaceMgr.AddNamespace("ns", "http://example.com/namespace")
 
-Local XmlNode &node;
-For &node in &nodeList
-   /* Process each found node */
-   WinMessage("Node Value: " | &node.NodeValue, 0);
-End-For;
+# Loop through all 'content' tags in the namespace
+foreach ($content in $xml.SelectNodes("//ns:content", $namespaceMgr)) {
+    
+    # Check if content length is greater than 70000
+    if ($content.'#text'.Length -gt 70000) {
+        
+        # Get the parent node
+        $parent = $content.ParentNode
+
+        # Find the 'docid' tag under the parent node in the namespace
+        $docid = $parent.SelectSingleNode("ns:docid", $namespaceMgr)
+        
+        # Output the docid value if it exists
+        if ($docid -ne $null) {
+            Write-Output "Content Length: $($content.'#text'.Length)"
+            Write-Output "DocID: $($docid.InnerText)"
+        }
+    }
+}
